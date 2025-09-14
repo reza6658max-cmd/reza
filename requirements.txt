@@ -3,3 +3,4 @@ apscheduler
 requests
 pytz
 flask
+Pillow

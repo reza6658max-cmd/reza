@@ -1,36 +1,47 @@
-from flask import Flask, request
-import telegram
+# ship_bot_render.py
+
 import os
+from flask import Flask, request
+from telegram import Bot, Update
+from telegram.ext import Dispatcher, CommandHandler, CallbackContext
 
-TOKEN = "8118285081:AAEVYk_XQHJDC7tx8sPu1EzRGo9XRwh876k"
-WEBHOOK_URL = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}/{TOKEN}"
+# ===========================
+# تنظیمات ربات
+# ===========================
+TOKEN = "8118285081:AAEVYk_XQHJDC7tx8sPu1EzRGo9XRwh876k"  # توکن ربات خود را اینجا بگذارید
 
-bot = telegram.Bot(token=TOKEN)
+bot = Bot(token=TOKEN)
 app = Flask(__name__)
+dp = Dispatcher(bot, None, workers=0, use_context=True)
 
-# Webhook route
+# ===========================
+# فرمان‌ها
+# ===========================
+def start(update: Update, context: CallbackContext):
+    update.message.reply_text("سلام! ربات آماده است.")
+
+dp.add_handler(CommandHandler("start", start))
+
+# ===========================
+# مسیر webhook
+# ===========================
 @app.route(f"/{TOKEN}", methods=["POST"])
 def webhook():
-    update = telegram.Update.de_json(request.get_json(force=True), bot)
-    
-    chat_id = update.message.chat.id
-    text = update.message.text
+    update = Update.de_json(request.get_json(force=True), bot)
+    dp.process_update(update)
+    return "OK"
 
-    if text == "/start":
-        bot.send_message(chat_id=chat_id, text="سلام! ربات فعال شد.")
-    else:
-        bot.send_message(chat_id=chat_id, text=f"پیام شما: {text}")
-
-    return "ok", 200
-
-@app.route("/", methods=["GET"])
+# صفحه اصلی
+@app.route("/")
 def index():
-    return "Bot is running", 200
+    return "Bot is running!"
 
+# ===========================
+# اجرا
+# ===========================
 if __name__ == "__main__":
-    # تنظیم Webhook در شروع
-    bot.set_webhook(url=WEBHOOK_URL)
     port = int(os.environ.get("PORT", 5000))
+    # تنظیم webhook روی آدرس Render
+    bot.set_webhook(f"https://marin-ship.onrender.com/{TOKEN}")
     app.run(host="0.0.0.0", port=port)
-
 

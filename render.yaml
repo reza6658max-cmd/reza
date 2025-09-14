@@ -2,7 +2,10 @@ services:
   - type: web
     name: marin_ship
     env: python
-    plan: free
     branch: main
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: python ship_bot.py
+    plan: free
+    envVars:
+      - key: 8118285081:AAEVYk_XQHJDC7tx8sPu1EzRGo9XRwh876k
+        fromSecret: 8118285081:AAEVYk_XQHJDC7tx8sPu1EzRGo9XRwh876k
